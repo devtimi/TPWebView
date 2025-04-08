@@ -415,8 +415,27 @@ End
 		HasBorder As Boolean
 	#tag EndComputedProperty
 
+	#tag ComputedProperty, Flags = &h0
+		#tag Getter
+			Get
+			  #if TargetMacOS or TargetLinux then
+			    return ctlHTMLViewer.IsAvailable
+			    
+			  #elseif TargetWindows then
+			    return mbIsAvailable
+			    
+			  #endif
+			End Get
+		#tag EndGetter
+		IsAvailable As Boolean
+	#tag EndComputedProperty
+
 	#tag Property, Flags = &h21
 		Private mbHasBorder As Boolean
+	#tag EndProperty
+
+	#tag Property, Flags = &h21
+		Private mbIsAvailable As Boolean
 	#tag EndProperty
 
 	#tag Property, Flags = &h21
@@ -440,6 +459,9 @@ End
 		  case "FocusLost"
 		    RaiseEvent FocusLost
 		    
+		  case "Initialized"
+		    mbIsAvailable = true
+		    
 		  case  "NavigationStarting"
 		    msLoadedURL = parameters.Lookup("URI", "")
 		    
@@ -449,8 +471,8 @@ End
 		  case "PrintToPdfFinished"
 		    RaiseEvent PrintComplete
 		    
-		  case "Initialized", "SourceChanged", _
 		    "PointerEntered", "PointerExited", "PointerMoved", "PointerPressed", "PointerReleased"
+		  case "ExecuteScriptFinished", "SourceChanged", _
 		    // Ignore these events
 		    #pragma unused parameters
 		    
