@@ -11,12 +11,12 @@ Begin DesktopWindow winMain
    HasMaximizeButton=   True
    HasMinimizeButton=   True
    HasTitleBar     =   True
-   Height          =   400
+   Height          =   480
    ImplicitInstance=   True
    MacProcID       =   0
    MaximumHeight   =   32000
    MaximumWidth    =   32000
-   MenuBar         =   1211240447
+   MenuBar         =   0
    MenuBarVisible  =   True
    MinimumHeight   =   64
    MinimumWidth    =   64
@@ -24,7 +24,7 @@ Begin DesktopWindow winMain
    Title           =   "TPWebView Demo"
    Type            =   0
    Visible         =   True
-   Width           =   600
+   Width           =   640
    Begin TPWebView ctlView
       AllowAutoDeactivate=   True
       AllowFocus      =   False
@@ -36,9 +36,10 @@ Begin DesktopWindow winMain
       Enabled         =   True
       HasBackgroundColor=   False
       HasBorder       =   True
-      Height          =   360
+      Height          =   398
       Index           =   -2147483648
       InitialParent   =   ""
+      IsAvailable     =   False
       Left            =   20
       LockBottom      =   True
       LockedInPosition=   False
@@ -50,10 +51,105 @@ Begin DesktopWindow winMain
       TabPanelIndex   =   0
       TabStop         =   True
       Tooltip         =   ""
+      Top             =   62
+      Transparent     =   False
+      UserAgent       =   "TPWebView"
+      Visible         =   True
+      Width           =   600
+   End
+   Begin DesktopTextField txtURL
+      AllowAutoDeactivate=   True
+      AllowFocusRing  =   True
+      AllowSpellChecking=   False
+      AllowTabs       =   False
+      BackgroundColor =   &cFFFFFF
+      Bold            =   False
+      Enabled         =   True
+      FontName        =   "System"
+      FontSize        =   0.0
+      FontUnit        =   0
+      Format          =   ""
+      HasBorder       =   True
+      Height          =   22
+      Hint            =   ""
+      Index           =   -2147483648
+      Italic          =   False
+      Left            =   20
+      LockBottom      =   False
+      LockedInPosition=   False
+      LockLeft        =   True
+      LockRight       =   True
+      LockTop         =   True
+      MaximumCharactersAllowed=   0
+      Password        =   False
+      ReadOnly        =   False
+      Scope           =   2
+      TabIndex        =   1
+      TabPanelIndex   =   0
+      TabStop         =   True
+      Text            =   "https://strawberrysw.com/lifeboat/changelog.html"
+      TextAlignment   =   0
+      TextColor       =   &c000000
+      Tooltip         =   ""
       Top             =   20
       Transparent     =   False
+      Underline       =   False
+      ValidationMask  =   ""
       Visible         =   True
-      Width           =   560
+      Width           =   480
+   End
+   Begin DesktopButton btnGo
+      AllowAutoDeactivate=   True
+      Bold            =   False
+      Cancel          =   False
+      Caption         =   "Go"
+      Default         =   True
+      Enabled         =   True
+      FontName        =   "System"
+      FontSize        =   0.0
+      FontUnit        =   0
+      Height          =   20
+      Index           =   -2147483648
+      Italic          =   False
+      Left            =   540
+      LockBottom      =   False
+      LockedInPosition=   False
+      LockLeft        =   False
+      LockRight       =   True
+      LockTop         =   True
+      MacButtonStyle  =   0
+      Scope           =   2
+      TabIndex        =   2
+      TabPanelIndex   =   0
+      TabStop         =   True
+      Tooltip         =   ""
+      Top             =   20
+      Transparent     =   False
+      Underline       =   False
+      Visible         =   True
+      Width           =   80
+   End
+   Begin DesktopProgressWheel pwWait
+      AllowAutoDeactivate=   True
+      AllowTabStop    =   True
+      Enabled         =   False
+      Height          =   16
+      Index           =   -2147483648
+      InitialParent   =   ""
+      Left            =   512
+      LockBottom      =   False
+      LockedInPosition=   False
+      LockLeft        =   False
+      LockRight       =   True
+      LockTop         =   True
+      Scope           =   2
+      TabIndex        =   3
+      TabPanelIndex   =   0
+      Tooltip         =   ""
+      Top             =   22
+      Transparent     =   False
+      Visible         =   False
+      Width           =   16
    End
 End
 #tag EndDesktopWindow
@@ -61,13 +157,59 @@ End
 #tag WindowCode
 	#tag Event
 		Sub Opening()
-		  ctlView.LoadURL("https://strawberrysw.com/lifeboat/changelog.html")
+		  btnGo.Press
 		End Sub
 	#tag EndEvent
 
 
+	#tag Method, Flags = &h21
+		Private Sub ToggleWait(bVisible as Boolean)
+		  pwWait.Enabled = bVisible
+		  pwWait.Visible = bVisible
+		  txtURL.Enabled = not bVisible
+		  
+		  if bVisible then
+		    txtURL.Width = pwWait.Left - 12 - txtURL.Left
+		    
+		  else
+		    txtURL.Width = btnGo.Left - 12 - txtURL.Left
+		    
+		  end
+		End Sub
+	#tag EndMethod
+
+
 #tag EndWindowCode
 
+#tag Events ctlView
+	#tag Event
+		Sub DocumentComplete(url as String)
+		  txtURL.Text = url
+		  ToggleWait(false)
+		End Sub
+	#tag EndEvent
+	#tag Event
+		Sub DocumentBegin(url as String)
+		  txtURL.Text = url
+		  ToggleWait(true)
+		End Sub
+	#tag EndEvent
+#tag EndEvents
+#tag Events btnGo
+	#tag Event
+		Sub Pressed()
+		  ctlView.LoadURL(txtURL.Text.Trim)
+		End Sub
+	#tag EndEvent
+	#tag Event
+		Sub Opening()
+		  #if TargetWindows then
+		    me.Height = 22
+		    
+		  #endif
+		End Sub
+	#tag EndEvent
+#tag EndEvents
 #tag ViewBehavior
 	#tag ViewProperty
 		Name="HasTitleBar"

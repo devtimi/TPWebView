@@ -442,6 +442,38 @@ End
 		Private msLoadedURL As String
 	#tag EndProperty
 
+	#tag Property, Flags = &h21
+		Private msUserAgent As String
+	#tag EndProperty
+
+	#tag ComputedProperty, Flags = &h0
+		#tag Getter
+			Get
+			  #if TargetMacOS or TargetLinux then
+			    return ctlHTMLViewer.UserAgent
+			    
+			  #elseif TargetWindows then
+			    if mbIsAvailable then return ctlWinWebView.UserAgent
+			    return msUserAgent
+			    
+			  #endif
+			End Get
+		#tag EndGetter
+		#tag Setter
+			Set
+			  #if TargetMacOS or TargetLinux then
+			    ctlHTMLViewer.UserAgent = value
+			    
+			  #elseif TargetWindows then
+			    msUserAgent = value
+			    if mbIsAvailable then ctlWinWebView.UserAgent = msUserAgent
+			    
+			  #endif
+			End Set
+		#tag EndSetter
+		UserAgent As String
+	#tag EndComputedProperty
+
 
 #tag EndWindowCode
 
@@ -462,11 +494,18 @@ End
 		  case "Initialized"
 		    mbIsAvailable = true
 		    
+		    // Can now set a custom UserAgent
+		    if msUserAgent <> "" then
+		      ctlWinWebView.UserAgent = msUserAgent
+		      
+		    end
+		    
 		  case "PointerPressed"
 		    RaiseEvent FocusReceived
 		    
 		  case  "NavigationStarting"
 		    msLoadedURL = parameters.Lookup("URI", "")
+		    RaiseEvent DocumentBegin(msLoadedURL)
 		    
 		  case "NavigationCompleted"
 		    RaiseEvent DocumentComplete(msLoadedURL)
@@ -745,7 +784,7 @@ End
 		EditorType=""
 	#tag EndViewProperty
 	#tag ViewProperty
-		Name="Visible"
+		Name="HasBorder"
 		Visible=true
 		Group="Appearance"
 		InitialValue="True"
@@ -753,26 +792,10 @@ End
 		EditorType=""
 	#tag EndViewProperty
 	#tag ViewProperty
-		Name="BackgroundColor"
-		Visible=false
-		Group="Background"
-		InitialValue=""
-		Type="ColorGroup"
-		EditorType="ColorGroup"
-	#tag EndViewProperty
-	#tag ViewProperty
-		Name="Backdrop"
-		Visible=false
-		Group="Background"
-		InitialValue=""
-		Type="Picture"
-		EditorType=""
-	#tag EndViewProperty
-	#tag ViewProperty
-		Name="HasBackgroundColor"
-		Visible=false
-		Group="Background"
-		InitialValue=""
+		Name="Visible"
+		Visible=true
+		Group="Appearance"
+		InitialValue="True"
 		Type="Boolean"
 		EditorType=""
 	#tag EndViewProperty
@@ -801,10 +824,42 @@ End
 		EditorType=""
 	#tag EndViewProperty
 	#tag ViewProperty
-		Name="HasBorder"
+		Name="IsAvailable"
+		Visible=false
+		Group="Behavior"
+		InitialValue=""
+		Type="Boolean"
+		EditorType=""
+	#tag EndViewProperty
+	#tag ViewProperty
+		Name="UserAgent"
 		Visible=true
 		Group="Behavior"
-		InitialValue="True"
+		InitialValue=""
+		Type="String"
+		EditorType="MultiLineEditor"
+	#tag EndViewProperty
+	#tag ViewProperty
+		Name="BackgroundColor"
+		Visible=false
+		Group="Background"
+		InitialValue=""
+		Type="ColorGroup"
+		EditorType="ColorGroup"
+	#tag EndViewProperty
+	#tag ViewProperty
+		Name="Backdrop"
+		Visible=false
+		Group="Background"
+		InitialValue=""
+		Type="Picture"
+		EditorType=""
+	#tag EndViewProperty
+	#tag ViewProperty
+		Name="HasBackgroundColor"
+		Visible=false
+		Group="Background"
+		InitialValue=""
 		Type="Boolean"
 		EditorType=""
 	#tag EndViewProperty
@@ -830,14 +885,6 @@ End
 		Group="Position"
 		InitialValue="0"
 		Type="Integer"
-		EditorType=""
-	#tag EndViewProperty
-	#tag ViewProperty
-		Name="IsAvailable"
-		Visible=false
-		Group="Behavior"
-		InitialValue=""
-		Type="Boolean"
 		EditorType=""
 	#tag EndViewProperty
 #tag EndViewBehavior
