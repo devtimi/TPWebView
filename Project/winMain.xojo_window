@@ -87,7 +87,7 @@ Begin DesktopWindow winMain
       TabIndex        =   1
       TabPanelIndex   =   0
       TabStop         =   True
-      Text            =   "https://strawberrysw.com/lifeboat/changelog.html"
+      Text            =   "https://echo.xojo.dev"
       TextAlignment   =   0
       TextColor       =   &c000000
       Tooltip         =   ""
@@ -198,6 +198,12 @@ End
 #tag Events btnGo
 	#tag Event
 		Sub Pressed()
+		  // Auto-prefix
+		  if txtURL.Text.Trim.Left(4) <> "http" then
+		    txtURL.Text = "https://" + txtURL.Text.Trim
+		    
+		  end
+		  
 		  ctlView.LoadURL(txtURL.Text.Trim)
 		End Sub
 	#tag EndEvent
