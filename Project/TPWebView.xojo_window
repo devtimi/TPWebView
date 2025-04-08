@@ -201,7 +201,7 @@ End
 		    ctlHTMLViewer.ExecuteJavaScript(js)
 		    
 		  #elseif TargetWindows then
-		    ctlWinWebView.Invoke("WebViewAlpha.GoBack")
+		    ctlWinWebView.Invoke("WebViewAlpha.ExecuteScriptAsync", js)
 		    
 		  #endif
 		End Sub
