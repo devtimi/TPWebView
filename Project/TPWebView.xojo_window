@@ -162,9 +162,9 @@ End
 		  // Draw border
 		  if mbHasBorder then
 		    #if TargetMacOS then
-		      g.DrawingColor = EinhugurMacOSBridge.NSColor.TertiaryLabelColor.ColorValue
+		      g.DrawingColor = MacTertiaryLabelColor
 		      
-		      if EinhugurMacOSBridge.NSWorkspace.AccessibilityDisplayShouldIncreaseContrast = false then
+		      if MacShouldIncreaseContrast = false then
 		        g.DrawingColor = Color.RGB(g.DrawingColor.Red, g.DrawingColor.Green, g.DrawingColor.Blue, 216)
 		        
 		      end
@@ -228,6 +228,56 @@ End
 		    
 		  #endif
 		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h21
+		Private Function MacShouldIncreaseContrast() As Boolean
+		  #if TargetMacOS then
+		    declare function NSClassFromString lib "Foundation" (clsName As CFStringRef) As Ptr
+		    declare function sharedWorkspace lib "AppKit" selector "sharedWorkspace" (cls As Ptr) As Ptr
+		    declare function accessibilityDisplayShouldIncreaseContrast lib "AppKit" selector _
+		    "accessibilityDisplayShouldIncreaseContrast" (ws As Ptr) As Boolean
+		    
+		    var nsWorkspaceClass as Ptr = NSClassFromString("NSWorkspace")
+		    var workspace as Ptr = sharedWorkspace(nsWorkspaceClass)
+		    
+		    return accessibilityDisplayShouldIncreaseContrast(workspace)
+		    
+		  #endif
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h21
+		Private Function MacTertiaryLabelColor() As Color
+		  #if TargetMacOS then
+		    declare function NSClassFromString lib "Foundation" (clsName as CFStringRef) as Ptr
+		    declare function tertiaryLabelColor lib "AppKit" selector "tertiaryLabelColor" (cls as Ptr) as Ptr
+		    declare function colorUsingColorSpaceName lib "AppKit" selector "colorUsingColorSpaceName:" (color as Ptr, colorSpaceName as CFStringRef) as Ptr
+		    declare function redComponent lib "AppKit" selector "redComponent" (color as Ptr) as CGFloat
+		    declare function greenComponent lib "AppKit" selector "greenComponent" (color as Ptr) as CGFloat
+		    declare function blueComponent lib "AppKit" selector "blueComponent" (color as Ptr) as CGFloat
+		    declare function alphaComponent lib "AppKit" selector "alphaComponent" (color as Ptr) as CGFloat
+		    
+		    const NSCalibratedRGBColorSpace as String = "NSCalibratedRGBColorSpace"
+		    
+		    var nsColorClass as Ptr = NSClassFromString("NSColor")
+		    var origColor as Ptr = tertiaryLabelColor(nsColorClass)
+		    if origColor = nil then return Color.Black
+		    
+		    // Convert to RGB color space
+		    var rgbColor as Ptr = colorUsingColorSpaceName(origColor, NSCalibratedRGBColorSpace)
+		    if rgbColor = nil then return Color.Black
+		    
+		    // Now safe to extract components
+		    var r as Double = redComponent(rgbColor)
+		    var g as Double = greenComponent(rgbColor)
+		    var b as Double = blueComponent(rgbColor)
+		    var a as Double = alphaComponent(rgbColor)
+		    
+		    return Color.RGBA(r * 255, g * 255, b * 255, a * 255)
+		    
+		  #endif
+		End Function
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
