@@ -184,6 +184,30 @@ End
 
 
 	#tag Method, Flags = &h0
+		Sub Cancel()
+		  #if TargetMacOS or TargetLinux then
+		    ctlHTMLViewer.Cancel
+		    
+		  #elseif TargetWindows then
+		    ctlWinWebView.Invoke("WebViewAlpha.Stop")
+		    
+		  #endif
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Sub ExecuteJavaScript(js as String)
+		  #if TargetMacOS or TargetLinux then
+		    ctlHTMLViewer.ExecuteJavaScript(js)
+		    
+		  #elseif TargetWindows then
+		    ctlWinWebView.Invoke("WebViewAlpha.GoBack")
+		    
+		  #endif
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
 		Sub GoBack()
 		  #if TargetMacOS or TargetLinux then
 		    ctlHTMLViewer.GoBack
@@ -229,6 +253,8 @@ End
 		    ctlWinWebView.Invoke("WebViewAlpha.Navigate", URL)
 		    
 		  #endif
+		  
+		  msLoadedURL = URL
 		End Sub
 	#tag EndMethod
 
@@ -291,6 +317,18 @@ End
 		    // I did not implement this, I never use HTMLViewer.Print
 		    // ctlWinWebView.Invoke("WebViewAlpha.PrintToPdfAsync", filePath as String)
 		    break
+		    
+		  #endif
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Sub Reload()
+		  #if TargetMacOS or TargetLinux then
+		    ctlHTMLViewer.LoadURL(msLoadedURL)
+		    
+		  #elseif TargetWindows then
+		    ctlWinWebView.Invoke("WebViewAlpha.Reload")
 		    
 		  #endif
 		End Sub
