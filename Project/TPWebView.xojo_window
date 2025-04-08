@@ -182,12 +182,63 @@ End
 
 
 	#tag Method, Flags = &h0
+		Sub GoBack()
+		  #if TargetMacOS or TargetLinux then
+		    ctlHTMLViewer.GoBack
+		    
+		  #elseif TargetWindows then
+		    ctlWinWebView.Invoke("WebViewAlpha.GoBack")
+		    
+		  #endif
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Sub GoForward()
+		  #if TargetMacOS or TargetLinux then
+		    ctlHTMLViewer.GoForward
+		    
+		  #elseif TargetWindows then
+		    ctlWinWebView.Invoke("WebViewAlpha.GoForward")
+		    
+		  #endif
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Sub LoadPage(source As String, base As FolderItem)
+		  #if TargetMacOS or TargetLinux then
+		    ctlHTMLViewer.LoadPage(source, base)
+		    
+		  #elseif TargetWindows then
+		    #pragma unused base
+		    ctlWinWebView.Invoke("WebViewAlpha.NavigateToString", source)
+		    
+		  #endif
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
 		Sub LoadURL(URL as String)
 		  #if TargetMacOS or TargetLinux then
 		    ctlHTMLViewer.LoadURL(URL)
 		    
 		  #elseif TargetWindows then
 		    ctlWinWebView.Invoke("WebViewAlpha.Navigate", URL)
+		    
+		  #endif
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Sub Print(showPrintDialog As Boolean = True)
+		  #if TargetMacOS or TargetLinux then
+		    ctlHTMLViewer.Print(showPrintDialog)
+		    
+		  #elseif TargetWindows then
+		    // I did not implement this, I never use HTMLViewer.Print
+		    // ctlWinWebView.Invoke("WebViewAlpha.PrintToPdfAsync", filePath as String)
+		    break
 		    
 		  #endif
 		End Sub
