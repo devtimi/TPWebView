@@ -462,6 +462,9 @@ End
 		  case "Initialized"
 		    mbIsAvailable = true
 		    
+		  case "PointerPressed"
+		    RaiseEvent FocusReceived
+		    
 		  case  "NavigationStarting"
 		    msLoadedURL = parameters.Lookup("URI", "")
 		    
@@ -471,8 +474,8 @@ End
 		  case "PrintToPdfFinished"
 		    RaiseEvent PrintComplete
 		    
-		    "PointerEntered", "PointerExited", "PointerMoved", "PointerPressed", "PointerReleased"
 		  case "ExecuteScriptFinished", "SourceChanged", _
+		    "PointerEntered", "PointerExited", "PointerMoved", "PointerReleased"
 		    // Ignore these events
 		    #pragma unused parameters
 		    
