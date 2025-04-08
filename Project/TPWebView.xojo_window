@@ -29,7 +29,7 @@ Begin DesktopContainer TPWebView
       Active          =   False
       AllowAutoDeactivate=   True
       AllowTabStop    =   True
-      Content         =   "<winui:WebView2 Name='WebView' />\n"
+      Content         =   "<winui:WebView2 Name=""WebViewAlpha"">\n</winui:WebView2>"
       Enabled         =   True
       Height          =   98
       Index           =   -2147483648
@@ -830,6 +830,14 @@ End
 		Group="Position"
 		InitialValue="0"
 		Type="Integer"
+		EditorType=""
+	#tag EndViewProperty
+	#tag ViewProperty
+		Name="IsAvailable"
+		Visible=false
+		Group="Behavior"
+		InitialValue=""
+		Type="Boolean"
 		EditorType=""
 	#tag EndViewProperty
 #tag EndViewBehavior
