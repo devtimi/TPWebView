@@ -25,13 +25,43 @@ Begin DesktopWindow winMain
    Type            =   0
    Visible         =   True
    Width           =   600
+   Begin TPWebView ctlView
+      AllowAutoDeactivate=   True
+      AllowFocus      =   False
+      AllowFocusRing  =   False
+      AllowTabs       =   True
+      Backdrop        =   0
+      BackgroundColor =   &cFFFFFF
+      Composited      =   False
+      Enabled         =   True
+      HasBackgroundColor=   False
+      HasBorder       =   True
+      Height          =   360
+      Index           =   -2147483648
+      InitialParent   =   ""
+      Left            =   20
+      LockBottom      =   True
+      LockedInPosition=   False
+      LockLeft        =   True
+      LockRight       =   True
+      LockTop         =   True
+      Scope           =   2
+      TabIndex        =   0
+      TabPanelIndex   =   0
+      TabStop         =   True
+      Tooltip         =   ""
+      Top             =   20
+      Transparent     =   False
+      Visible         =   True
+      Width           =   560
+   End
 End
 #tag EndDesktopWindow
 
 #tag WindowCode
 	#tag Event
 		Sub Opening()
-		  
+		  ctlView.LoadURL("https://strawberrysw.com/lifeboat/changelog.html")
 		End Sub
 	#tag EndEvent
 
