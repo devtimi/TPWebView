@@ -1,3 +1,3 @@
-# WebView
+# TPWebView
 
-A DesktopContainer that uses the a XAML WebView2 on Windows to achieve a cross-platform HTMLViewer that can render CSS.
+A DesktopContainer that behaves like HTMLViewer and uses the a XAML WebView2 on Windows to can render CSS better.
