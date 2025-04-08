@@ -215,18 +215,6 @@ End
 	#tag EndHook
 
 	#tag Hook, Flags = &h0
-		Event DragEnter(obj As DragItem, action As DragItem.Types) As Boolean
-	#tag EndHook
-
-	#tag Hook, Flags = &h0
-		Event DragExit(obj As DragItem, action As DragItem.Types)
-	#tag EndHook
-
-	#tag Hook, Flags = &h0
-		Event DragOver(x As Integer, y As Integer, obj As DragItem, action As DragItem.Types) As Boolean
-	#tag EndHook
-
-	#tag Hook, Flags = &h0
 		Event Error(error As RuntimeException)
 	#tag EndHook
 
@@ -240,14 +228,6 @@ End
 
 	#tag Hook, Flags = &h0
 		Event JavaScriptRequest(method As String, parameters() as Variant) As String
-	#tag EndHook
-
-	#tag Hook, Flags = &h0
-		Event KeyDown(key As String) As Boolean
-	#tag EndHook
-
-	#tag Hook, Flags = &h0
-		Event KeyUp(key As String)
 	#tag EndHook
 
 	#tag Hook, Flags = &h0
@@ -309,6 +289,9 @@ End
 	#tag Event
 		Sub EventTriggered(eventName As String, parameters As Dictionary)
 		  select case eventName
+		  case "DocumentTitleChanged"
+		    RaiseEvent TitleChanged(parameters.Lookup("DocumentTitle", ""))
+		    
 		  case "FocusReceived"
 		    // Push the focus back to the window
 		    self.SetFocus
@@ -322,16 +305,19 @@ End
 		  case "NavigationCompleted"
 		    RaiseEvent DocumentComplete(msLoadedURL)
 		    
-		  case "Initialized", "DocumentTitleChanged", "SourceChanged", _
+		  case "PrintToPdfFinished"
+		    RaiseEvent PrintComplete
+		    
+		  case "Initialized", "SourceChanged", _
 		    "PointerEntered", "PointerExited", "PointerMoved", "PointerPressed", "PointerReleased"
 		    // Ignore these events
 		    #pragma unused parameters
 		    
+		  case else
 		    // Log unknown events
 		    #if DebugBuild then
-		  case else
-		    System.DebugLog(eventName)
-		    
+		      System.DebugLog(eventName)
+		      
 		    #endif
 		    
 		  end select
@@ -371,17 +357,25 @@ End
 	#tag EndEvent
 	#tag Event
 		Function DragEnter(obj As DragItem, action As DragItem.Types) As Boolean
-		  
+		  // Consume this event, it is never raised due to framework limitations
+		  #pragma unused obj
+		  #pragma unused action
 		End Function
 	#tag EndEvent
 	#tag Event
 		Sub DragExit(obj As DragItem, action As DragItem.Types)
-		  
+		  // Consume this event, it is never raised due to framework limitations
+		  #pragma unused obj
+		  #pragma unused action
 		End Sub
 	#tag EndEvent
 	#tag Event
 		Function DragOver(x As Integer, y As Integer, obj As DragItem, action As DragItem.Types) As Boolean
-		  
+		  // Consume this event, it is never raised due to framework limitations
+		  #pragma unused x
+		  #pragma unused y
+		  #pragma unused obj
+		  #pragma unused action
 		End Function
 	#tag EndEvent
 	#tag Event
@@ -396,27 +390,29 @@ End
 	#tag EndEvent
 	#tag Event
 		Sub FocusReceived()
-		  
+		  RaiseEvent FocusReceived
 		End Sub
 	#tag EndEvent
 	#tag Event
 		Function JavaScriptRequest(method As String, parameters() as Variant) As String
-		  
+		  return RaiseEvent JavaScriptRequest(method, parameters)
 		End Function
 	#tag EndEvent
 	#tag Event
 		Function KeyDown(key As String) As Boolean
-		  
+		  // Consume this event, it is never raised due to framework limitations
+		  #pragma unused key
 		End Function
 	#tag EndEvent
 	#tag Event
 		Sub KeyUp(key As String)
-		  
+		  // Consume this event, it is never raised due to framework limitations
+		  #pragma unused key
 		End Sub
 	#tag EndEvent
 	#tag Event
 		Function NewWindow(url as String) As DesktopHTMLViewer
-		  
+		  return RaiseEvent NewWindow(url)
 		End Function
 	#tag EndEvent
 	#tag Event
@@ -426,27 +422,27 @@ End
 	#tag EndEvent
 	#tag Event
 		Sub PrintComplete()
-		  
+		  RaiseEvent PrintComplete
 		End Sub
 	#tag EndEvent
 	#tag Event
 		Sub PrintError(error As RuntimeException)
-		  
+		  RaiseEvent PrintError(error)
 		End Sub
 	#tag EndEvent
 	#tag Event
 		Sub SecurityChanged(isSecure As Boolean)
-		  
+		  RaiseEvent SecurityChanged(isSecure)
 		End Sub
 	#tag EndEvent
 	#tag Event
 		Sub StatusChanged(newStatus as String)
-		  
+		  RaiseEvent StatusChanged(newStatus)
 		End Sub
 	#tag EndEvent
 	#tag Event
 		Sub TitleChanged(newTitle as String)
-		  
+		  RaiseEvent TitleChanged(newTitle)
 		End Sub
 	#tag EndEvent
 #tag EndEvents
