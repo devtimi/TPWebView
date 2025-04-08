@@ -152,6 +152,8 @@ End
 		    ctlHTMLViewer.Visible = false
 		    
 		  #endif
+		  
+		  RaiseEvent Opening
 		End Sub
 	#tag EndEvent
 
@@ -433,7 +435,7 @@ End
 #tag Events ctlHTMLViewer
 	#tag Event
 		Function CancelLoad(URL as String) As Boolean
-		  
+		  return RaiseEvent CancelLoad(URL)
 		End Function
 	#tag EndEvent
 	#tag Event
@@ -443,7 +445,7 @@ End
 	#tag EndEvent
 	#tag Event
 		Sub DocumentBegin(url as String)
-		  
+		  RaiseEvent DocumentBegin(url)
 		End Sub
 	#tag EndEvent
 	#tag Event
@@ -453,7 +455,7 @@ End
 	#tag EndEvent
 	#tag Event
 		Sub DocumentProgressChanged(URL as String, percentageComplete as Integer)
-		  
+		  RaiseEvent DocumentProgressChanged(URL, percentageComplete)
 		End Sub
 	#tag EndEvent
 	#tag Event
@@ -481,7 +483,7 @@ End
 	#tag EndEvent
 	#tag Event
 		Sub Error(error As RuntimeException)
-		  
+		  RaiseEvent Error(error)
 		End Sub
 	#tag EndEvent
 	#tag Event
@@ -515,11 +517,6 @@ End
 		Function NewWindow(url as String) As DesktopHTMLViewer
 		  return RaiseEvent NewWindow(url)
 		End Function
-	#tag EndEvent
-	#tag Event
-		Sub Opening()
-		  
-		End Sub
 	#tag EndEvent
 	#tag Event
 		Sub PrintComplete()
