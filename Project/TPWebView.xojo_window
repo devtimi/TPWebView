@@ -123,6 +123,11 @@ End
 		    AddHandler moMacView.StatusChanged, WeakAddressOf HandleStatusChanged
 		    AddHandler moMacView.TitleChanged, WeakAddressOf HandleTitleChanged
 		    
+		    moMacView.LockLeft = true
+		    moMacView.LockRight = true
+		    moMacView.LockTop = true
+		    moMacView.LockBottom = true
+		    
 		    // Make available
 		    me.AddControl(moMacView)
 		    mbIsAvailable = true
