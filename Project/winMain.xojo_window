@@ -21,7 +21,7 @@ Begin DesktopWindow winMain
    MinimumHeight   =   64
    MinimumWidth    =   64
    Resizeable      =   True
-   Title           =   "TPWebView Demo"
+   Title           =   "#kTitle"
    Type            =   0
    Visible         =   True
    Width           =   640
@@ -179,6 +179,10 @@ End
 	#tag EndMethod
 
 
+	#tag Constant, Name = kTitle, Type = String, Dynamic = False, Default = \"TPWebView Demo", Scope = Private
+	#tag EndConstant
+
+
 #tag EndWindowCode
 
 #tag Events ctlView
@@ -192,6 +196,17 @@ End
 		Sub DocumentBegin(url as String)
 		  txtURL.Text = url
 		  ToggleWait(true)
+		End Sub
+	#tag EndEvent
+	#tag Event
+		Sub TitleChanged(newTitle as String)
+		  if newTitle = "" then
+		    self.Title = kTitle
+		    
+		  else
+		    self.Title = kTitle + " - " + newTitle
+		    
+		  end
 		End Sub
 	#tag EndEvent
 #tag EndEvents
