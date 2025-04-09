@@ -28,7 +28,6 @@ Begin DesktopContainer TPWebView
    Begin DesktopXAMLContainer ctlWinWebView
       Active          =   False
       AllowAutoDeactivate=   True
-      AllowTabStop    =   True
       Content         =   "<winui:WebView2 Name=""WebViewAlpha"">\n</winui:WebView2>"
       Enabled         =   True
       Height          =   98
@@ -44,6 +43,7 @@ Begin DesktopContainer TPWebView
       Scope           =   2
       TabIndex        =   1
       TabPanelIndex   =   0
+      TabStop         =   True
       Tooltip         =   ""
       Top             =   1
       Transparent     =   False
@@ -54,64 +54,32 @@ Begin DesktopContainer TPWebView
       _mName          =   ""
       _mPanelIndex    =   0
    End
-   Begin DesktopHTMLViewer ctlHTMLViewer
-      AutoDeactivate  =   True
-      Enabled         =   True
-      Height          =   98
-      Index           =   -2147483648
-      InitialParent   =   ""
-      Left            =   1
-      LockBottom      =   True
-      LockedInPosition=   False
-      LockLeft        =   True
-      LockRight       =   True
-      LockTop         =   True
-      Renderer        =   0
-      Scope           =   2
-      TabIndex        =   0
-      TabPanelIndex   =   0
-      TabStop         =   True
-      Tooltip         =   ""
-      Top             =   1
-      Visible         =   True
-      Width           =   98
-   End
 End
 #tag EndDesktopWindow
 
 #tag WindowCode
 	#tag Event
 		Sub Closing()
-		  // Implemented to allow for Event Defintion
-		  // Sent from platform specific viewer control
+		  if moMacView <> nil then
+		    RemoveHandler moMacView.CancelLoad, WeakAddressOf HandleCancelLoad
+		    RemoveHandler moMacView.DocumentBegin, WeakAddressOf HandleDocumentBegin
+		    RemoveHandler moMacView.DocumentComplete, WeakAddressOf HandleDocumentComplete
+		    RemoveHandler moMacView.DocumentProgressChanged, WeakAddressOf HandleDocumentProgressChanged
+		    RemoveHandler moMacView.FocusLost, WeakAddressOf HandleFocusLost
+		    RemoveHandler moMacView.FocusReceived, WeakAddressOf HandleFocusReceived
+		    RemoveHandler moMacView.JavaScriptRequest, WeakAddressOf HandleJavaScriptRequest
+		    RemoveHandler moMacView.NewWindow, WeakAddressOf HandleNewWindow
+		    RemoveHandler moMacView.PrintComplete, WeakAddressOf HandlePrintComplete
+		    RemoveHandler moMacView.PrintError, WeakAddressOf HandlePrintError
+		    RemoveHandler moMacView.SecurityChanged, WeakAddressOf HandleSecurityChanged
+		    RemoveHandler moMacView.StatusChanged, WeakAddressOf HandleStatusChanged
+		    RemoveHandler moMacView.TitleChanged, WeakAddressOf HandleTitleChanged
+		    
+		    moMacView.Close
+		    moMacView = nil
+		    
+		  end
 		End Sub
-	#tag EndEvent
-
-	#tag Event
-		Function DragEnter(obj As DragItem, action As DragItem.Types) As Boolean
-		  // Implemented to allow for Event Defintion
-		  #pragma unused obj
-		  #pragma unused action
-		  
-		End Function
-	#tag EndEvent
-
-	#tag Event
-		Sub DragExit(obj As DragItem, action As DragItem.Types)
-		  // Implemented to allow for Event Defintion
-		  #pragma unused obj
-		  #pragma unused action
-		End Sub
-	#tag EndEvent
-
-	#tag Event
-		Function DragOver(x As Integer, y As Integer, obj As DragItem, action As DragItem.Types) As Boolean
-		  // Implemented to allow for Event Defintion
-		  #pragma unused x
-		  #pragma unused y
-		  #pragma unused obj
-		  #pragma unused action 
-		End Function
 	#tag EndEvent
 
 	#tag Event
@@ -129,27 +97,43 @@ End
 	#tag EndEvent
 
 	#tag Event
-		Function KeyDown(key As String) As Boolean
-		  // Implemented to allow for Event Defintion
-		  #pragma unused key
-		End Function
-	#tag EndEvent
-
-	#tag Event
-		Sub KeyUp(key As String)
-		  // Implemented to allow for Event Defintion
-		  #pragma unused key
-		End Sub
-	#tag EndEvent
-
-	#tag Event
 		Sub Opening()
 		  #if TargetMacOS or TargetLinux then
+		    // Close XAML control
 		    ctlWinWebView.Close
 		    
+		    // Set up Mac viewer
+		    moMacView = new DesktopHTMLViewer
+		    moMacView.Top = 1
+		    moMacView.Left = 1
+		    moMacView.Width = self.Width - 2
+		    moMacView.Height = self.Height - 2
+		    
+		    AddHandler moMacView.CancelLoad, WeakAddressOf HandleCancelLoad
+		    AddHandler moMacView.DocumentBegin, WeakAddressOf HandleDocumentBegin
+		    AddHandler moMacView.DocumentComplete, WeakAddressOf HandleDocumentComplete
+		    AddHandler moMacView.DocumentProgressChanged, WeakAddressOf HandleDocumentProgressChanged
+		    AddHandler moMacView.FocusLost, WeakAddressOf HandleFocusLost
+		    AddHandler moMacView.FocusReceived, WeakAddressOf HandleFocusReceived
+		    AddHandler moMacView.JavaScriptRequest, WeakAddressOf HandleJavaScriptRequest
+		    AddHandler moMacView.NewWindow, WeakAddressOf HandleNewWindow
+		    AddHandler moMacView.PrintComplete, WeakAddressOf HandlePrintComplete
+		    AddHandler moMacView.PrintError, WeakAddressOf HandlePrintError
+		    AddHandler moMacView.SecurityChanged, WeakAddressOf HandleSecurityChanged
+		    AddHandler moMacView.StatusChanged, WeakAddressOf HandleStatusChanged
+		    AddHandler moMacView.TitleChanged, WeakAddressOf HandleTitleChanged
+		    
+		    // Make available
+		    me.AddControl(moMacView)
+		    mbIsAvailable = true
+		    
+		    // Can now set a custom UserAgent
+		    if msUserAgent <> "" then
+		      moMacView.UserAgent = msUserAgent
+		      
+		    end
+		    
 		  #elseif TargetWindows then
-		    ctlHTMLViewer.Enabled = false
-		    ctlHTMLViewer.Visible = false
 		    
 		  #endif
 		  
@@ -186,7 +170,7 @@ End
 	#tag Method, Flags = &h0
 		Sub Cancel()
 		  #if TargetMacOS or TargetLinux then
-		    ctlHTMLViewer.Cancel
+		    moMacView.Cancel
 		    
 		  #elseif TargetWindows then
 		    ctlWinWebView.Invoke("WebViewAlpha.Stop")
@@ -195,10 +179,17 @@ End
 		End Sub
 	#tag EndMethod
 
+	#tag Method, Flags = &h21
+		Private Sub Error(oSender As DesktopHTMLViewer, error As RuntimeException)
+		  #pragma unused oSender
+		  RaiseEvent Error(error)
+		End Sub
+	#tag EndMethod
+
 	#tag Method, Flags = &h0
 		Sub ExecuteJavaScript(js as String)
 		  #if TargetMacOS or TargetLinux then
-		    ctlHTMLViewer.ExecuteJavaScript(js)
+		    moMacView.ExecuteJavaScript(js)
 		    
 		  #elseif TargetWindows then
 		    ctlWinWebView.Invoke("WebViewAlpha.ExecuteScriptAsync", js)
@@ -210,7 +201,7 @@ End
 	#tag Method, Flags = &h0
 		Sub GoBack()
 		  #if TargetMacOS or TargetLinux then
-		    ctlHTMLViewer.GoBack
+		    moMacView.GoBack
 		    
 		  #elseif TargetWindows then
 		    ctlWinWebView.Invoke("WebViewAlpha.GoBack")
@@ -222,7 +213,7 @@ End
 	#tag Method, Flags = &h0
 		Sub GoForward()
 		  #if TargetMacOS or TargetLinux then
-		    ctlHTMLViewer.GoForward
+		    moMacView.GoForward
 		    
 		  #elseif TargetWindows then
 		    ctlWinWebView.Invoke("WebViewAlpha.GoForward")
@@ -231,10 +222,101 @@ End
 		End Sub
 	#tag EndMethod
 
+	#tag Method, Flags = &h21
+		Private Function HandleCancelLoad(oSender as DesktopHTMLViewer, URL as String) As Boolean
+		  #pragma unused oSender
+		  return RaiseEvent CancelLoad(URL)
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h21
+		Private Sub HandleDocumentBegin(oSender as DesktopHTMLViewer, url as String)
+		  #pragma unused oSender
+		  RaiseEvent DocumentBegin(url)
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h21
+		Private Sub HandleDocumentComplete(oSender as DesktopHTMLViewer, url as String)
+		  #pragma unused oSender
+		  RaiseEvent DocumentComplete(url)
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h21
+		Private Sub HandleDocumentProgressChanged(oSender as DesktopHTMLViewer, URL as String, percentageComplete as Integer)
+		  #pragma unused oSender
+		  RaiseEvent DocumentProgressChanged(URL, percentageComplete)
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h21
+		Private Sub HandleFocusLost(oSender as DesktopHTMLViewer)
+		  #pragma unused oSender
+		  RaiseEvent FocusLost
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h21
+		Private Sub HandleFocusReceived(oSender as DesktopHTMLViewer)
+		  #pragma unused oSender
+		  RaiseEvent FocusReceived
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h21
+		Private Function HandleJavaScriptRequest(oSender as DesktopHTMLViewer, method as String, parameters() as Variant) As String
+		  #pragma unused oSender
+		  return RaiseEvent JavaScriptRequest(method, parameters)
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h21
+		Private Function HandleNewWindow(oSender as DesktopHTMLViewer, url as String) As DesktopHTMLViewer
+		  #pragma unused oSender
+		  return RaiseEvent NewWindow(url)
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h21
+		Private Sub HandlePrintComplete(oSender as DesktopHTMLViewer)
+		  #pragma unused oSender
+		  RaiseEvent PrintComplete
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h21
+		Private Sub HandlePrintError(oSender As DesktopHTMLViewer, error As RuntimeException)
+		  #pragma unused oSender
+		  RaiseEvent PrintError(error)
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h21
+		Private Sub HandleSecurityChanged(oSender as DesktopHTMLViewer, isSecure as Boolean)
+		  #pragma unused oSender
+		  RaiseEvent SecurityChanged(isSecure)
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h21
+		Private Sub HandleStatusChanged(oSender as DesktopHTMLViewer, newStatus as String)
+		  #pragma unused oSender
+		  RaiseEvent StatusChanged(newStatus)
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h21
+		Private Sub HandleTitleChanged(oSender as DesktopHTMLViewer, newTitle as String)
+		  #pragma unused oSender
+		  RaiseEvent TitleChanged(newTitle)
+		End Sub
+	#tag EndMethod
+
 	#tag Method, Flags = &h0
 		Sub LoadPage(source As String, base As FolderItem)
 		  #if TargetMacOS or TargetLinux then
-		    ctlHTMLViewer.LoadPage(source, base)
+		    moMacView.LoadPage(source, base)
 		    
 		  #elseif TargetWindows then
 		    #pragma unused base
@@ -247,7 +329,7 @@ End
 	#tag Method, Flags = &h0
 		Sub LoadURL(URL as String)
 		  #if TargetMacOS or TargetLinux then
-		    ctlHTMLViewer.LoadURL(URL)
+		    moMacView.LoadURL(URL)
 		    
 		  #elseif TargetWindows then
 		    ctlWinWebView.Invoke("WebViewAlpha.Navigate", URL)
@@ -311,7 +393,7 @@ End
 	#tag Method, Flags = &h0
 		Sub Print(showPrintDialog As Boolean = True)
 		  #if TargetMacOS or TargetLinux then
-		    ctlHTMLViewer.Print(showPrintDialog)
+		    moMacView.Print(showPrintDialog)
 		    
 		  #elseif TargetWindows then
 		    // I did not implement this, I never use HTMLViewer.Print
@@ -325,7 +407,7 @@ End
 	#tag Method, Flags = &h0
 		Sub Reload()
 		  #if TargetMacOS or TargetLinux then
-		    ctlHTMLViewer.LoadURL(msLoadedURL)
+		    moMacView.LoadURL(msLoadedURL)
 		    
 		  #elseif TargetWindows then
 		    ctlWinWebView.Invoke("WebViewAlpha.Reload")
@@ -419,7 +501,7 @@ End
 		#tag Getter
 			Get
 			  #if TargetMacOS or TargetLinux then
-			    return ctlHTMLViewer.IsAvailable
+			    return moMacView.IsAvailable
 			    
 			  #elseif TargetWindows then
 			    return mbIsAvailable
@@ -439,6 +521,10 @@ End
 	#tag EndProperty
 
 	#tag Property, Flags = &h21
+		Private moMacView As DesktopHTMLViewer
+	#tag EndProperty
+
+	#tag Property, Flags = &h21
 		Private msLoadedURL As String
 	#tag EndProperty
 
@@ -450,7 +536,7 @@ End
 		#tag Getter
 			Get
 			  #if TargetMacOS or TargetLinux then
-			    return ctlHTMLViewer.UserAgent
+			    return moMacView.UserAgent
 			    
 			  #elseif TargetWindows then
 			    if mbIsAvailable then return ctlWinWebView.UserAgent
@@ -461,11 +547,12 @@ End
 		#tag EndGetter
 		#tag Setter
 			Set
+			  msUserAgent = value
+			  
 			  #if TargetMacOS or TargetLinux then
-			    ctlHTMLViewer.UserAgent = value
+			    if mbIsAvailable then moMacView.UserAgent = value
 			    
 			  #elseif TargetWindows then
-			    msUserAgent = value
 			    if mbIsAvailable then ctlWinWebView.UserAgent = msUserAgent
 			    
 			  #endif
@@ -526,123 +613,6 @@ End
 		    #endif
 		    
 		  end select
-		End Sub
-	#tag EndEvent
-	#tag Event
-		Sub Closing()
-		  RaiseEvent Closing
-		End Sub
-	#tag EndEvent
-#tag EndEvents
-#tag Events ctlHTMLViewer
-	#tag Event
-		Function CancelLoad(URL as String) As Boolean
-		  return RaiseEvent CancelLoad(URL)
-		End Function
-	#tag EndEvent
-	#tag Event
-		Sub Closing()
-		  RaiseEvent Closing
-		End Sub
-	#tag EndEvent
-	#tag Event
-		Sub DocumentBegin(url as String)
-		  RaiseEvent DocumentBegin(url)
-		End Sub
-	#tag EndEvent
-	#tag Event
-		Sub DocumentComplete(url as String)
-		  RaiseEvent DocumentComplete(url)
-		End Sub
-	#tag EndEvent
-	#tag Event
-		Sub DocumentProgressChanged(URL as String, percentageComplete as Integer)
-		  RaiseEvent DocumentProgressChanged(URL, percentageComplete)
-		End Sub
-	#tag EndEvent
-	#tag Event
-		Function DragEnter(obj As DragItem, action As DragItem.Types) As Boolean
-		  // Consume this event, it is never raised due to framework limitations
-		  #pragma unused obj
-		  #pragma unused action
-		End Function
-	#tag EndEvent
-	#tag Event
-		Sub DragExit(obj As DragItem, action As DragItem.Types)
-		  // Consume this event, it is never raised due to framework limitations
-		  #pragma unused obj
-		  #pragma unused action
-		End Sub
-	#tag EndEvent
-	#tag Event
-		Function DragOver(x As Integer, y As Integer, obj As DragItem, action As DragItem.Types) As Boolean
-		  // Consume this event, it is never raised due to framework limitations
-		  #pragma unused x
-		  #pragma unused y
-		  #pragma unused obj
-		  #pragma unused action
-		End Function
-	#tag EndEvent
-	#tag Event
-		Sub Error(error As RuntimeException)
-		  RaiseEvent Error(error)
-		End Sub
-	#tag EndEvent
-	#tag Event
-		Sub FocusLost()
-		  RaiseEvent FocusLost
-		End Sub
-	#tag EndEvent
-	#tag Event
-		Sub FocusReceived()
-		  RaiseEvent FocusReceived
-		End Sub
-	#tag EndEvent
-	#tag Event
-		Function JavaScriptRequest(method As String, parameters() as Variant) As String
-		  return RaiseEvent JavaScriptRequest(method, parameters)
-		End Function
-	#tag EndEvent
-	#tag Event
-		Function KeyDown(key As String) As Boolean
-		  // Consume this event, it is never raised due to framework limitations
-		  #pragma unused key
-		End Function
-	#tag EndEvent
-	#tag Event
-		Sub KeyUp(key As String)
-		  // Consume this event, it is never raised due to framework limitations
-		  #pragma unused key
-		End Sub
-	#tag EndEvent
-	#tag Event
-		Function NewWindow(url as String) As DesktopHTMLViewer
-		  return RaiseEvent NewWindow(url)
-		End Function
-	#tag EndEvent
-	#tag Event
-		Sub PrintComplete()
-		  RaiseEvent PrintComplete
-		End Sub
-	#tag EndEvent
-	#tag Event
-		Sub PrintError(error As RuntimeException)
-		  RaiseEvent PrintError(error)
-		End Sub
-	#tag EndEvent
-	#tag Event
-		Sub SecurityChanged(isSecure As Boolean)
-		  RaiseEvent SecurityChanged(isSecure)
-		End Sub
-	#tag EndEvent
-	#tag Event
-		Sub StatusChanged(newStatus as String)
-		  RaiseEvent StatusChanged(newStatus)
-		End Sub
-	#tag EndEvent
-	#tag Event
-		Sub TitleChanged(newTitle as String)
-		  RaiseEvent TitleChanged(newTitle)
 		End Sub
 	#tag EndEvent
 #tag EndEvents
